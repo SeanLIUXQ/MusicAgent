@@ -15,7 +15,7 @@ import re # 导入正则表达式库，用于清理和提取JSON
 # Qwen API 配置（通过阿里云 DashScope）
 # 请确保已设置环境变量 DASHSCOPE_API_KEY，或在此处直接赋值
 # DASHSCOPE_API_KEY = os.getenv("DASHSCOPE_API_KEY")
-DASHSCOPE_API_KEY = "sk-b2819f02c4e7492a83b7b04059094470" # 示例Key，请替换为你自己的
+DASHSCOPE_API_KEY = "替换成自己的API-key" # 示例Key，请替换为你自己的
 BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 MODEL_NAME = "qwen3-max"
 
@@ -1150,4 +1150,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
