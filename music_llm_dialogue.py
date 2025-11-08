@@ -38,7 +38,7 @@ from basic_pitch.inference import predict
 import pretty_midi
 
 # API配置
-API_KEY = "sk-b2819f02c4e7492a83b7b04059094470"
+API_KEY = "替换成自己的API-Key"
 dashscope.base_http_api_url = 'https://dashscope.aliyuncs.com/api/v1'
 
 
@@ -1039,4 +1039,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
