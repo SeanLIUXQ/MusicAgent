@@ -6,7 +6,7 @@
 1. 注意需要使用自己的API-Key，默认使用Qwen3-Max模型，可以自行选择模型  
 2. 需要激活虚拟环境使用
 3. 优先使用music_llm_dialogue_V2.py,V1是早期版本
-4. 基本步骤：
+4. 基本步骤：  
    【步骤1】用户上传原始音频文件（MP3/WAV等）  
    ↓  
    【步骤2】音频特征提取（extract_audio_features_and_midi）  
@@ -70,6 +70,6 @@
    ├─ 使用 subprocess 执行：  
    │ python midi_to_audio.py output_1.mid --wav output_1_render.wav --mp3 output_1_render.mp3  
    └─ 生成最终音频文件  
-   ↓
+   ↓  
    【步骤10】循环对话（可选）  
    └─ 用户可以继续输入新的风格需求，重复步骤5-9  
