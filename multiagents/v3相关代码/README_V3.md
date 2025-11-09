@@ -1,6 +1,8 @@
 
 # V3版本图形化界面：
 <img width="1102" height="966" alt="image" src="https://github.com/user-attachments/assets/31207576-7070-4d33-9d2e-cea637cb31d4" />  
+
+
 # V3版本避免在生成 Sonic Pi 代码时使用内置函数名（如 chord）作为变量名：  
 ## 主要修改  
 1. 创建保留字列表 (v3.py)  
