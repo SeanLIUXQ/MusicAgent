@@ -19,9 +19,11 @@
    │ └─ 平均能量  
    │ └─ 使用 basic_pitch 转录为 MIDI：  
    ├─ predict() 函数将音频转换为 PrettyMIDI 对象  
-   ├─ PrettyMIDI → MIDI bytes └─ MIDI bytes → mido.MidiFile 解析  
+   ├─ PrettyMIDI → MIDI bytes  
+   └─ MIDI bytes → mido.MidiFile 解析  
    ↓  
-   【步骤3】MIDI转换为JSON格式 ├─ 提取所有MIDI事件（note_on, note_off, program_change等）  
+   【步骤3】MIDI转换为JSON格式  
+   ├─ 提取所有MIDI事件（note_on, note_off, program_change等）    
    ├─ 转换为JSON格式：  
    │ {  
    │ "tempo": 120,  
