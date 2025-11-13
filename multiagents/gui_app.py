@@ -315,7 +315,7 @@ class MusicGeneratorGUI(QMainWindow):
     def init_client(self):
         """Initialize OpenAI client"""
         # Note: User needs to configure API key here
-        api_key = 'sk-b981b70b68c042dd998d6a75e1ef6a42'  # Can be read from config file or environment variable
+        api_key = 'sk-7416236c6b924c9e9343c642572ed969'  # Can be read from config file or environment variable
         base_url = "https://api.deepseek.com"
         self.client = OpenAI(api_key=api_key, base_url=base_url)
     

@@ -517,12 +517,12 @@ def multi_agent_generate_sonic_pi(prompt_text, client, user_feedback=None, previ
         output_dir = Path(".")
     else:
         output_dir = Path(output_dir)
-        output_dir.mkdir(exist_ok=True, parents=True)
-    
+
+    output_dir.mkdir(exist_ok=True, parents=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     midi_filename = output_dir / f"sonic_pi_output_{timestamp}.mid"
     
-    log("🔧 Step 4: Compiler - Compiling code to MIDI file...\n")
+    log("🔧 Step 4: Compiler - Compiling code to MIDI file...midi_filename\n")
     midi_path = sonic_pi_code_to_midi(sonic_pi_code, str(midi_filename), client, log_callback=log)
     
     if midi_path:
