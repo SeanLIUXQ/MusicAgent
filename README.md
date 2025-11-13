@@ -1,7 +1,9 @@
 # MusicAgent  
 ### Project 版本更新说明：  
+
 ## 赵明泽：v2已更新，最新代码在`multiagents`文件夹下。  
 ## Sean：更新v3版本，对v2版本的API调用以及提示词约束进行改动，最新代码在`./multiagents./v3相关代码`文件夹中；优化GUI界面显示
+### 李睿恒：v4已经更新，最新代码在`multiagents`的v4文件夹下，包含前端vue和后端flask，优化了GUI，并在v4文件夹的v3代码中删除不使用的内容
 
 ### 相关说明：
 **1. 在midi2music文件夹内，有midi转音频的相关代码环境**
