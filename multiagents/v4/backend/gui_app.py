@@ -18,7 +18,7 @@ from pathlib import Path
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QTextEdit, QPushButton, QLabel, 
                              QMessageBox, QProgressBar, QDialog, QLineEdit,
-                             QFrame, QScrollArea, QGroupBox)
+                             QFrame, QScrollArea, QGroupBox, QComboBox)
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QPropertyAnimation, QEasingCurve, QRect
 from PyQt5.QtGui import QFont, QPalette, QColor, QIcon
 
@@ -52,6 +52,7 @@ HAVE_AUTOMATION = HAVE_PYAUTOGUI and HAVE_WIN32
 from openai import OpenAI
 import v3
 import style_transfer
+import intent_dispatcher
 from pathlib import Path
 
 
@@ -81,15 +82,28 @@ class GenerateThread(QThread):
             self.log_message.emit(f"📝 Original User Prompt:\n{self.prompt_text}\n")
             self.log_message.emit("=" * 60 + "\n")
             
-            self.progress.emit("🌐 Translating user requirements to professional terminology...")
-            code, midi_path = v3.multi_agent_generate_sonic_pi(
-                self.prompt_text, 
-                self.client, 
+            # 使用意图理解调度器处理用户输入
+            self.progress.emit("🎯 正在通过意图理解调度器处理请求...")
+            
+            # 调用意图理解调度器
+            dispatch_result = intent_dispatcher.dispatch_intent(
+                user_input=self.prompt_text,
+                client=self.client,
+                original_code=self.previous_code,  # 如果之前有代码，可用于风格转换
                 user_feedback=self.user_feedback,
                 previous_code=self.previous_code,
-                output_dir=self.output_dir,
+                output_dir=str(self.output_dir),
+                api_key=None,  # 使用默认API Key
                 log_callback=self.log_callback
             )
+            
+            # 获取调度结果
+            code = dispatch_result.get('code')
+            midi_path = dispatch_result.get('midi_path')
+            action = dispatch_result.get('action', 'unknown')
+            
+            self.log_message.emit(f"\n✅ 调度完成\n执行动作: {action}\n")
+            
             if code:
                 self.finished.emit(code, midi_path or "")
             else:
@@ -312,11 +326,15 @@ class MusicGeneratorGUI(QMainWindow):
         self.midi_path = None
         self.midi_output_dir = Path(".") / "midi_output"
         self.midi_output_dir.mkdir(exist_ok=True)
+        self.selected_history_file = None  # 用于存储选中的历史文件
         self.init_ui()
         self.init_client()
         
         # Connect signals
         self.generation_complete.connect(self.on_generation_complete)
+        
+        # 初始加载历史文件列表
+        self.refresh_history_list()
         
     def init_ui(self):
         self.setWindowTitle("🎵 Sonic Pi Music Generator")
@@ -533,6 +551,40 @@ class MusicGeneratorGUI(QMainWindow):
         progress_frame.setLayout(progress_layout)
         layout.addWidget(progress_frame)
         
+        # 历史文件选择区域
+        history_group = QGroupBox("📁 历史生成文件（用于风格转换）")
+        history_group.setFont(QFont("Segoe UI", 11, QFont.Bold))
+        history_layout = QHBoxLayout()
+        history_layout.setSpacing(10)
+        
+        # 文件列表下拉框
+        self.history_combo = QComboBox()
+        self.history_combo.setFont(QFont("Segoe UI", 10))
+        self.history_combo.setMinimumHeight(35)
+        self.history_combo.setPlaceholderText("选择历史文件...")
+        self.history_combo.currentIndexChanged.connect(self.on_history_file_selected)
+        history_layout.addWidget(self.history_combo, 3)
+        
+        # 加载按钮
+        self.load_history_btn = QPushButton("📂 加载选中文件")
+        self.load_history_btn.setFont(QFont("Segoe UI", 10, QFont.Bold))
+        self.load_history_btn.setMinimumHeight(35)
+        self.load_history_btn.clicked.connect(self.load_selected_history)
+        self.load_history_btn.setEnabled(False)
+        history_layout.addWidget(self.load_history_btn, 1)
+        
+        # 刷新按钮
+        refresh_btn = QPushButton("🔄")
+        refresh_btn.setFont(QFont("Segoe UI", 10, QFont.Bold))
+        refresh_btn.setMinimumHeight(35)
+        refresh_btn.setMaximumWidth(50)
+        refresh_btn.setToolTip("刷新历史文件列表")
+        refresh_btn.clicked.connect(self.refresh_history_list)
+        history_layout.addWidget(refresh_btn)
+        
+        history_group.setLayout(history_layout)
+        layout.addWidget(history_group)
+        
         # Generated code display area with group box
         code_group = QGroupBox("📄 Generated Code")
         code_group.setFont(QFont("Segoe UI", 11, QFont.Bold))
@@ -579,9 +631,25 @@ class MusicGeneratorGUI(QMainWindow):
         
     def init_client(self):
         """Initialize OpenAI client"""
-        # Note: User needs to configure API key here
-        api_key = 'sk-7416236c6b924c9e9343c642572ed969'  # Can be read from config file or environment variable
+        # 优先使用环境变量，否则使用默认值
+        import os
+        api_key = os.getenv('DEEPSEEK_API_KEY', 'your_api_key_here')  # 请替换为您的 DeepSeek API Key
         base_url = "https://api.deepseek.com/v1"
+        
+        if api_key == 'your_api_key_here':
+            QMessageBox.warning(
+                self,
+                "API Key 未配置",
+                "请设置 DEEPSEEK_API_KEY 环境变量或修改 gui_app.py 第 599 行的 API Key。\n\n"
+                "获取 API Key:\n"
+                "1. 访问 https://platform.deepseek.com/\n"
+                "2. 注册/登录账号\n"
+                "3. 在 API Keys 页面创建新的 Key\n\n"
+                "设置环境变量:\n"
+                "PowerShell: $env:DEEPSEEK_API_KEY='your_key'\n"
+                "CMD: set DEEPSEEK_API_KEY=your_key"
+            )
+        
         self.client = OpenAI(api_key=api_key, base_url=base_url)
     
     def on_generate_clicked(self):
@@ -630,8 +698,13 @@ class MusicGeneratorGUI(QMainWindow):
             }
         """)
         
-        # Start generation thread
-        self.generate_thread = GenerateThread(prompt_text, self.client, output_dir=str(self.midi_output_dir))
+        # Start generation thread (传递之前生成的代码用于风格转换)
+        self.generate_thread = GenerateThread(
+            prompt_text, 
+            self.client, 
+            previous_code=self.generated_code if self.generated_code else None,
+            output_dir=str(self.midi_output_dir)
+        )
         self.generate_thread.finished.connect(self.on_generation_finished)
         self.generate_thread.error.connect(self.on_generation_error)
         self.generate_thread.progress.connect(self.on_progress_update)
@@ -696,6 +769,13 @@ class MusicGeneratorGUI(QMainWindow):
         self.save_midi_btn.setEnabled(True)
         self.style_transfer_btn.setEnabled(True)
         self.progress_bar.setVisible(False)
+        
+        # 保存代码文件到 midi_output 目录
+        if code:
+            self.save_code_file(code, midi_path)
+        
+        # 刷新历史文件列表
+        self.refresh_history_list()
         
         if self.midi_path:
             self.status_label.setText(f"✅ 生成完成！MIDI 文件已保存: {Path(midi_path).name}")
@@ -1224,6 +1304,111 @@ class MusicGeneratorGUI(QMainWindow):
             }
         """)
         msg.exec_()
+    
+    def save_code_file(self, code, midi_path=None):
+        """保存代码文件到 midi_output 目录"""
+        try:
+            from datetime import datetime
+            # 生成文件名（与 MIDI 文件同名或使用时间戳）
+            if midi_path:
+                base_name = Path(midi_path).stem
+            else:
+                base_name = f"sonic_pi_code_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            
+            code_file = self.midi_output_dir / f"{base_name}.rb"
+            
+            # 保存代码
+            with open(code_file, "w", encoding="utf-8") as f:
+                f.write(code)
+            
+            self.log_display.append(f"💾 代码已保存: {code_file.name}\n")
+        except Exception as e:
+            self.log_display.append(f"⚠️ 代码保存失败: {str(e)}\n")
+    
+    def refresh_history_list(self):
+        """刷新历史文件列表"""
+        try:
+            # 清空当前列表
+            self.history_combo.clear()
+            
+            # 获取所有 .rb 文件
+            rb_files = sorted(
+                self.midi_output_dir.glob("*.rb"),
+                key=lambda x: x.stat().st_mtime,
+                reverse=True  # 最新的在前面
+            )
+            
+            if not rb_files:
+                self.history_combo.addItem("📭 暂无历史文件")
+                self.load_history_btn.setEnabled(False)
+                return
+            
+            # 添加文件到下拉框
+            for rb_file in rb_files:
+                # 显示文件名和修改时间
+                from datetime import datetime
+                mtime = datetime.fromtimestamp(rb_file.stat().st_mtime)
+                display_name = f"{rb_file.stem} ({mtime.strftime('%Y-%m-%d %H:%M')})"
+                self.history_combo.addItem(display_name, rb_file)  # 将文件路径存储为 userData
+            
+            self.load_history_btn.setEnabled(True)
+            
+        except Exception as e:
+            self.log_display.append(f"⚠️ 刷新历史列表失败: {str(e)}\n")
+    
+    def on_history_file_selected(self, index):
+        """历史文件选中事件"""
+        if index >= 0 and self.history_combo.currentData():
+            self.selected_history_file = self.history_combo.currentData()
+            self.load_history_btn.setEnabled(True)
+        else:
+            self.selected_history_file = None
+            self.load_history_btn.setEnabled(False)
+    
+    def load_selected_history(self):
+        """加载选中的历史文件"""
+        if not self.selected_history_file:
+            QMessageBox.warning(self, "警告", "请先选择一个历史文件！")
+            return
+        
+        try:
+            # 读取文件内容
+            with open(self.selected_history_file, "r", encoding="utf-8") as f:
+                code = f.read()
+            
+            # 更新显示和内部状态
+            self.generated_code = code
+            self.code_display.setPlainText(code)
+            
+            # 更新状态
+            file_name = self.selected_history_file.name
+            self.status_label.setText(f"📂 已加载: {file_name}")
+            self.status_label.setStyleSheet("""
+                QLabel {
+                    color: #3498db;
+                    padding: 8px;
+                    background-color: #d6eaf8;
+                    border-radius: 6px;
+                }
+            """)
+            
+            self.log_display.append(f"\n📂 已加载历史文件: {file_name}\n")
+            self.log_display.append("💡 现在可以对这个代码进行风格转换或修改了！\n")
+            
+            # 启用相关按钮
+            self.feedback_btn.setEnabled(True)
+            self.style_transfer_btn.setEnabled(True)
+            
+            QMessageBox.information(
+                self, 
+                "✅ 加载成功", 
+                f"已加载文件: {file_name}\n\n现在可以对这个代码进行：\n• 风格转换\n• 反馈修改"
+            )
+            
+        except Exception as e:
+            error_msg = f"加载文件失败: {str(e)}"
+            self.log_display.append(f"❌ {error_msg}\n")
+            QMessageBox.critical(self, "❌ 错误", error_msg)
 
 
 def main():
