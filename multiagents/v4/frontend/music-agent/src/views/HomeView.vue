@@ -47,9 +47,38 @@
                             class="btn btn-control">
                             <span class="btn-label">Style Transfer</span>
                         </button>
-                        <button @click="downloadMidi" :disabled="!midiPath" class="btn btn-control">
-                            <span class="btn-label">Download MIDI</span>
+                        <button @click="chooseHistory" class="btn btn-control">
+                            <span class="btn-label">Choose History</span>
                         </button>
+                    </div>
+
+                    <!-- History File Selection -->
+                    <div class="history-section" v-if="historyView">
+                        <div class="input-label" style="margin-bottom: 12px;">
+                            📁 History Files (for Style Transfer)
+                        </div>
+                        <div class="history-controls">
+                            <select v-model="selectedHistoryFile" class="history-select" @change="onHistoryFileSelected"
+                                @click="refreshHistory">
+                                <option :value="'Select a history file'">Select a history file...</option>
+                                <option v-for="file in historyFiles" :key="file.filename" :value="file.filename">
+                                    {{ file.display_name }}
+                                </option>
+                            </select>
+                            <div class="icon-btn refresh-btn" title="Refresh history">
+                                {{ selectedHistoryFile }}
+                            </div>
+                        </div>
+                        <div class="history-actions">
+                            <button @click="loadHistoryFile" :disabled="!selectedHistoryFile || isGenerating"
+                                class="btn btn-control btn-small">
+                                📂 Load Selected
+                            </button>
+                            <button @click="deleteHistoryFile" :disabled="!selectedHistoryFile || isGenerating"
+                                class="btn btn-danger btn-small">
+                                🗑️ Delete
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Progress Indicator -->
@@ -102,8 +131,6 @@
                         </div>
                     </div>
                 </section>
-
-
             </main>
         </div>
 
@@ -136,11 +163,11 @@
                 <div class="modal-body">
                     <p class="modal-description">Specify the musical style you want to apply</p>
                     <div class="style-tags">
-                        <span class="tag">Rock</span>
-                        <span class="tag">Jazz</span>
-                        <span class="tag">Classical</span>
-                        <span class="tag">Electronic</span>
-                        <span class="tag">Ambient</span>
+                        <span class="tag" @click="styleRequest = 'Convert to rock style'">Rock</span>
+                        <span class="tag" @click="styleRequest = 'Convert to jazz style'">Jazz</span>
+                        <span class="tag" @click="styleRequest = 'Convert to classical style'">Classical</span>
+                        <span class="tag" @click="styleRequest = 'Convert to electronic style'">Electronic</span>
+                        <span class="tag" @click="styleRequest = 'Convert to ambient style'">Ambient</span>
                     </div>
                     <textarea v-model="styleRequest" class="modal-input"
                         placeholder="e.g., Convert to rock style, make it more jazzy, add electronic elements..."
@@ -156,7 +183,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, onBeforeUnmount } from 'vue';
+import { ref, nextTick, onBeforeUnmount, onMounted } from 'vue';
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000/api';
@@ -166,6 +193,7 @@ const prompt = ref('');
 const generatedCode = ref('');
 const originalPrompt = ref('');
 const midiPath = ref<string | null>(null);
+const currentCodeFile = ref<string | null>(null);
 const logs = ref<string[]>([]);
 const statusText = ref('Ready to generate');
 const isGenerating = ref(false);
@@ -175,6 +203,11 @@ const feedbackText = ref('');
 const styleRequest = ref('');
 const currentTaskId = ref<string | null>(null);
 const logDisplay = ref<HTMLElement | null>(null);
+const historyView = ref(false)
+
+// 历史文件管理
+const historyFiles = ref<HistoryFile[]>([]);
+const selectedHistoryFile = ref<string | null>('Select a history file');
 
 let pollingInterval: number | null = null;
 
@@ -190,8 +223,97 @@ interface TaskStatus {
     logs: string[];
     result_code: string | null;
     midi_path: string | null;
+    code_file_path: string | null;
+    action: string | null;
     error_message: string | null;
 }
+
+interface HistoryFile {
+    filename: string;
+    display_name: string;
+    modified_time: string;
+    size: number;
+}
+
+interface HistoryResponse {
+    files: HistoryFile[];
+    count: number;
+}
+
+interface HistoryFileContent {
+    filename: string;
+    code: string;
+    modified_time: string;
+}
+
+// 组件挂载时加载历史文件
+onMounted(() => {
+    refreshHistory();
+});
+
+// 刷新历史文件列表
+const refreshHistory = async () => {
+    try {
+        const response = await axios.get<HistoryResponse>(`${API_BASE_URL}/history`);
+        historyFiles.value = response.data.files;
+    } catch (error) {
+        console.error('Failed to load history:', error);
+    }
+};
+
+// 历史文件选择事件
+const onHistoryFileSelected = () => {
+}
+
+// 加载选中的历史文件
+const loadHistoryFile = async () => {
+    if (!selectedHistoryFile.value) return;
+    if (selectedHistoryFile.value == 'Select a history file') {
+        currentCodeFile.value = null
+        generatedCode.value = '';
+        return;
+    }
+    try {
+        const response = await axios.get<HistoryFileContent>(
+            `${API_BASE_URL}/history/${selectedHistoryFile.value}`
+        );
+
+        generatedCode.value = response.data.code;
+        currentCodeFile.value = response.data.filename;
+        statusText.value = `📂 Loaded: ${response.data.filename}`;
+        logs.value.push(`\n📂 Loaded history file: ${response.data.filename}`);
+        logs.value.push('💡 You can now perform style transfer or modifications on this code!\n');
+
+        scrollLogsToBottom();
+    } catch (error) {
+        handleError(error);
+    }
+};
+
+// 删除历史文件
+const deleteHistoryFile = async () => {
+    if (!selectedHistoryFile.value) return;
+
+    if (!confirm(`Are you sure you want to delete ${selectedHistoryFile.value}?`)) {
+        return;
+    }
+
+    try {
+        await axios.delete(`${API_BASE_URL}/history/${selectedHistoryFile.value}`);
+        logs.value.push(`🗑️ Deleted file: ${selectedHistoryFile.value}`);
+        selectedHistoryFile.value = null;
+        await refreshHistory();
+        alert('File deleted successfully');
+    } catch (error) {
+        handleError(error);
+    }
+};
+
+// 下载代码文件
+const downloadCodeFile = () => {
+    if (!currentCodeFile.value) return;
+    window.open(`${API_BASE_URL}/code/${currentCodeFile.value}`, '_blank');
+};
 
 // 生成音乐
 const generateMusic = async () => {
@@ -201,6 +323,7 @@ const generateMusic = async () => {
     generatedCode.value = '';
     logs.value = [];
     midiPath.value = null;
+    currentCodeFile.value = null;
     originalPrompt.value = prompt.value;
     statusText.value = 'Generating music code...';
 
@@ -224,11 +347,11 @@ const copyCode = async () => {
 
     try {
         await navigator.clipboard.writeText(generatedCode.value);
-        alert('代码已复制到剪贴板');
+        alert('Code copied to clipboard');
     } catch (err) {
-        console.error('复制失败:', err);
+        console.error('Copy failed:', err);
     }
-}
+};
 
 const clearLogs = async () => {
     if (!logs.value) {
@@ -238,9 +361,9 @@ const clearLogs = async () => {
     try {
         logs.value = [];
     } catch (err) {
-
+        // Handle error
     }
-}
+};
 
 // 提交反馈
 const submitFeedback = async () => {
@@ -322,10 +445,14 @@ const startPolling = () => {
             if (task.status === 'completed') {
                 generatedCode.value = task.result_code || '';
                 midiPath.value = task.midi_path;
+                currentCodeFile.value = task.code_file_path ? task.code_file_path.split('/').pop() || null : null;
                 isGenerating.value = false;
                 if (pollingInterval !== null) {
                     clearInterval(pollingInterval);
                 }
+
+                // 刷新历史文件列表
+                await refreshHistory();
 
                 if (midiPath.value) {
                     statusText.value = 'Generation completed successfully';
@@ -356,10 +483,8 @@ const showStyleDialog = () => {
     showStyle.value = true;
 };
 
-const downloadMidi = () => {
-    if (!midiPath.value) return;
-    const filename = midiPath.value.split('/').pop();
-    window.open(`${API_BASE_URL}/midi/${filename}`, '_blank');
+const chooseHistory = () => {
+    historyView.value = !historyView.value
 };
 
 const handleError = (error: any) => {
@@ -385,7 +510,6 @@ onBeforeUnmount(() => {
 });
 </script>
 
-
 <style scoped>
 * {
     box-sizing: border-box;
@@ -393,7 +517,7 @@ onBeforeUnmount(() => {
 
 .app-container {
     min-height: 100vh;
-    width: 100vw;
+    width: 99vw;
     padding: 0;
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
@@ -475,7 +599,7 @@ onBeforeUnmount(() => {
     padding-right: 50px;
     display: grid;
     grid-template-columns: 420px 1fr;
-    gap: 60px;
+    gap: 50px;
     align-items: start;
 }
 
@@ -508,21 +632,16 @@ onBeforeUnmount(() => {
 .header-actions {
     display: flex;
     width: 100px;
-
 }
 
 .icon-btn {
     background: transparent;
     border: none;
     padding: 6px;
-    cursor: pointer;
     border-radius: 6px;
     transition: background 0.2s;
     font-size: 16px;
-}
-
-.icon-btn:hover {
-    background: #f7fafc;
+    cursor: pointer;
 }
 
 /* Input Group */
@@ -556,6 +675,71 @@ onBeforeUnmount(() => {
     outline: none;
     border-color: #4299e1;
     box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+/* History Section */
+.history-section {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: #f7fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.history-controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #4a5568;
+}
+
+.history-select {
+    flex: 1;
+    width: 20px;
+
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 13px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+
+}
+
+.history-select:focus {
+    outline: none;
+    border-color: #4299e1;
+}
+
+.refresh-btn {
+    padding: 8px 12px;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+}
+
+.history-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.btn-small {
+    padding: 8px 12px;
+    font-size: 12px;
+}
+
+.btn-danger {
+    background: #fee;
+    color: #c53030;
+    border: 1px solid #feb2b2;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: #fecaca;
+    border-color: #fc8181;
 }
 
 /* Action Panel */
@@ -671,7 +855,7 @@ onBeforeUnmount(() => {
 /* Right Panel */
 .right-panel {
     display: flex;
-    gap: 28px;
+    gap: 35px;
 }
 
 .output-section {
@@ -694,8 +878,6 @@ onBeforeUnmount(() => {
     border-bottom: 1px solid #e2e8f0;
 }
 
-
-
 /* Code Container */
 .code-container {
     margin: 35px;
@@ -704,7 +886,6 @@ onBeforeUnmount(() => {
     border-radius: 8px;
     max-width: 380px;
     border: 2px solid #e2e8f0;
-
 }
 
 .code-content {
@@ -721,8 +902,6 @@ onBeforeUnmount(() => {
     scrollbar-color: #c6c8ce #d4d8e2;
 }
 
-
-/* 代码语法高亮（可选） */
 .code-content code {
     color: #68467e;
     display: block;

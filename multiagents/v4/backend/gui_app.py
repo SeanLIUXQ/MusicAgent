@@ -55,7 +55,7 @@ import style_transfer
 import intent_dispatcher
 from pathlib import Path
 
-
+deepseek_api_key = 'sk-78ac4fe101aa495091ff83198ac47c3a'
 class GenerateThread(QThread):
     """Thread for generating code"""
     finished = pyqtSignal(str, str)  # Generation completed, pass (code, midi_path)
@@ -633,7 +633,7 @@ class MusicGeneratorGUI(QMainWindow):
         """Initialize OpenAI client"""
         # 优先使用环境变量，否则使用默认值
         import os
-        api_key = os.getenv('DEEPSEEK_API_KEY', 'your_api_key_here')  # 请替换为您的 DeepSeek API Key
+        api_key = os.getenv('DEEPSEEK_API_KEY', deepseek_api_key)  # 请替换为您的 DeepSeek API Key
         base_url = "https://api.deepseek.com/v1"
         
         if api_key == 'your_api_key_here':
