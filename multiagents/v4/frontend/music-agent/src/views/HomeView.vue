@@ -37,20 +37,40 @@
                             <span style="margin-left: 20px;">Generate</span>
                         </button>
                     </div>
-
+                    <!-- Progress Indicator -->
+                    <div v-if="isGenerating" class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-bar-fill"></div>
+                        </div>
+                        <p class="progress-text">Processing...</p>
+                    </div>
                     <div class="control-grid">
                         <button @click="showFeedbackDialog" :disabled="!generatedCode || isGenerating"
                             class="btn btn-control">
+                            <span class="btn-icon">💬</span>
                             <span class="btn-label">Feedback</span>
                         </button>
+
                         <button @click="showStyleDialog" :disabled="!generatedCode || isGenerating"
                             class="btn btn-control">
+                            <span class="btn-icon">🎨</span>
                             <span class="btn-label">Style Transfer</span>
                         </button>
+
                         <button @click="chooseHistory" class="btn btn-control">
+                            <span class="btn-icon">📚</span>
                             <span class="btn-label">Choose History</span>
                         </button>
+
+                        <button @click="triggerAudioUpload" :disabled="isGenerating"
+                            class="btn btn-control btn-audio-upload">
+                            <span class="btn-icon">🎧</span>
+                            <span class="btn-label">Import Audio</span>
+                        </button>
                     </div>
+
+                    <input ref="audioFileInput" type="file" accept=".wav,.mp3,.flac,.m4a,.ogg,audio/*"
+                        @change="onAudioFileSelected" style="display: none" />
 
                     <!-- History File Selection -->
                     <div class="history-section" v-if="historyView">
@@ -81,13 +101,7 @@
                         </div>
                     </div>
 
-                    <!-- Progress Indicator -->
-                    <div v-if="isGenerating" class="progress-container">
-                        <div class="progress-bar">
-                            <div class="progress-bar-fill"></div>
-                        </div>
-                        <p class="progress-text">Processing...</p>
-                    </div>
+
                 </div>
             </aside>
 
@@ -203,13 +217,22 @@ const feedbackText = ref('');
 const styleRequest = ref('');
 const currentTaskId = ref<string | null>(null);
 const logDisplay = ref<HTMLElement | null>(null);
-const historyView = ref(false)
+const historyView = ref(false);
+
+// 🆕 音频上传相关
+const audioFileInput = ref<HTMLInputElement | null>(null);
+const selectedAudioFile = ref<File | null>(null);
+const selectedAudioFileName = ref<string>('');
 
 // 历史文件管理
 const historyFiles = ref<HistoryFile[]>([]);
 const selectedHistoryFile = ref<string | null>('Select a history file');
 
 let pollingInterval: number | null = null;
+
+// 🆕 音频文件配置
+const ALLOWED_AUDIO_EXTENSIONS = ['.wav', '.mp3', '.flac', '.m4a', '.ogg'];
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 // 接口定义
 interface TaskResponse {
@@ -225,6 +248,7 @@ interface TaskStatus {
     midi_path: string | null;
     code_file_path: string | null;
     action: string | null;
+    music_prompt: string | null;  // 🆕 添加音乐描述字段
     error_message: string | null;
 }
 
@@ -269,7 +293,7 @@ const onHistoryFileSelected = () => {
 const loadHistoryFile = async () => {
     if (!selectedHistoryFile.value) return;
     if (selectedHistoryFile.value == 'Select a history file') {
-        currentCodeFile.value = null
+        currentCodeFile.value = null;
         generatedCode.value = '';
         return;
     }
@@ -424,6 +448,125 @@ const submitStyleTransfer = async () => {
     }
 };
 
+// 🆕 触发音频文件选择
+const triggerAudioUpload = () => {
+    audioFileInput.value?.click();
+};
+
+// 🆕 清除选中的音频文件
+const clearAudioFile = () => {
+    selectedAudioFile.value = null;
+    selectedAudioFileName.value = '';
+    if (audioFileInput.value) {
+        audioFileInput.value.value = '';
+    }
+};
+
+// 🆕 格式化文件大小
+const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+};
+
+// 🆕 音频文件选择处理
+const onAudioFileSelected = async (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+
+    if (!file) return;
+
+    // 验证文件扩展名
+    const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+
+    if (!ALLOWED_AUDIO_EXTENSIONS.includes(fileExtension)) {
+        alert(`不支持的文件格式\n支持的格式: ${ALLOWED_AUDIO_EXTENSIONS.join(', ')}`);
+        target.value = '';
+        return;
+    }
+
+    // 验证文件大小
+    if (file.size > MAX_FILE_SIZE) {
+        alert(`文件过大\n文件大小不能超过 ${(MAX_FILE_SIZE / 1024 / 1024).toFixed(0)}MB`);
+        target.value = '';
+        return;
+    }
+
+    // 保存文件信息
+    selectedAudioFile.value = file;
+    selectedAudioFileName.value = file.name;
+
+    // 记录日志
+    logs.value.push(`\n📁 Selected audio file: ${file.name} (${formatFileSize(file.size)})`);
+    scrollLogsToBottom();
+
+    // 立即上传
+    await uploadAudioFile();
+
+    // 上传后清除选择（避免重复上传）
+    target.value = '';
+};
+
+// 🆕 上传音频文件
+const uploadAudioFile = async () => {
+    if (!selectedAudioFile.value) {
+        alert('请先选择音频文件');
+        return;
+    }
+
+    // 重置状态
+    isGenerating.value = true;
+    generatedCode.value = '';
+    logs.value = [];
+    midiPath.value = null;
+    currentCodeFile.value = null;
+    statusText.value = '🎧 Uploading audio file...';
+
+    // 记录开始
+    logs.value.push('='.repeat(60));
+    logs.value.push(`🎧 Starting audio import: ${selectedAudioFile.value.name}`);
+    logs.value.push(`📏 File size: ${formatFileSize(selectedAudioFile.value.size)}`);
+    logs.value.push('='.repeat(60));
+    scrollLogsToBottom();
+
+    try {
+        // 创建 FormData
+        const formData = new FormData();
+        formData.append('audio_file', selectedAudioFile.value);
+
+        // 上传文件
+        const response = await axios.post<TaskResponse>(
+            `${API_BASE_URL}/import-audio`,
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }
+        );
+
+        currentTaskId.value = response.data.task_id;
+        statusText.value = '🎧 Audio uploaded, analyzing...';
+        logs.value.push('✅ File uploaded successfully, processing...\n');
+        scrollLogsToBottom();
+
+        // 开始轮询任务状态（复用现有的轮询机制）
+        startPolling();
+
+    } catch (error: any) {
+        const errorMsg = error.response?.data?.error || error.message || 'Upload failed';
+        statusText.value = '❌ Upload failed';
+        logs.value.push(`\n❌ Error: ${errorMsg}`);
+        alert(`音频上传失败:\n${errorMsg}`);
+        isGenerating.value = false;
+        scrollLogsToBottom();
+    } finally {
+        // 清除文件选择
+        selectedAudioFile.value = null;
+        selectedAudioFileName.value = '';
+    }
+};
+
 // 开始轮询任务状态
 const startPolling = () => {
     if (pollingInterval !== null) {
@@ -454,11 +597,19 @@ const startPolling = () => {
                 // 刷新历史文件列表
                 await refreshHistory();
 
-                if (midiPath.value) {
+                // 🆕 处理音频导入的特殊情况
+                if (task.action === 'audio_import' && task.music_prompt) {
+                    logs.value.push(`\n🎵 Music Description from Qwen-Omni:`);
+                    logs.value.push(`   ${task.music_prompt}`);
+                    statusText.value = '✅ Audio import completed';
+                    alert(`音频导入完成!\n\n音乐描述:\n${task.music_prompt}`);
+                } else if (midiPath.value) {
                     statusText.value = 'Generation completed successfully';
                 } else {
                     statusText.value = 'Generation completed (MIDI compilation failed)';
                 }
+
+                scrollLogsToBottom();
             } else if (task.status === 'error') {
                 statusText.value = `Error: ${task.error_message}`;
                 isGenerating.value = false;
@@ -484,7 +635,7 @@ const showStyleDialog = () => {
 };
 
 const chooseHistory = () => {
-    historyView.value = !historyView.value
+    historyView.value = !historyView.value;
 };
 
 const handleError = (error: any) => {
@@ -786,27 +937,122 @@ onBeforeUnmount(() => {
 }
 
 /* Control Grid */
+/* Control Grid */
 .control-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
     margin-bottom: 24px;
 }
 
 .btn-control {
-    padding: 12px 8px;
-    background: #f7fafc;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
     color: #2d3748;
-    border: 1px solid #e2e8f0;
+    border: 2px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-control::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+.btn-control:hover:not(:disabled)::before {
+    left: 100%;
 }
 
 .btn-control:hover:not(:disabled) {
-    background: #edf2f7;
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
     border-color: #cbd5e0;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(102, 126, 234, 0.15);
+}
+
+.btn-control:active:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(102, 126, 234, 0.1);
+}
+
+.btn-control:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #fafafa;
+}
+
+.btn-icon {
+    font-size: 24px;
+    line-height: 1;
+    transition: transform 0.3s ease;
+}
+
+.btn-control:hover:not(:disabled) .btn-icon {
+    transform: scale(1.1);
 }
 
 .btn-label {
     font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+/* 文件指示器 */
+.audio-file-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 13px;
+}
+
+.file-icon {
+    font-size: 16px;
+}
+
+.file-name {
+    flex: 1;
+    color: #0c4a6e;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-size {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.btn-clear {
+    padding: 2px 6px;
+    background: transparent;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.btn-clear:hover {
+    color: #ef4444;
 }
 
 /* Progress */

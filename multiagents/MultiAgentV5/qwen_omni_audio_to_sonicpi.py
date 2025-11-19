@@ -37,7 +37,7 @@ SUPPORTED_AUDIO_EXTS = {
     ".m4a": "audio/m4a",
     ".ogg": "audio/ogg",
 }
-
+qwen_api_key = 'sk-e960c6602f8c4f858104d1778fcad1c5'
 # 默认使用的模型名称（可通过环境变量覆盖）
 DEFAULT_MODEL = os.getenv("QWEN_OMNI_MODEL") or "qwen3-omni-flash"
 
@@ -79,7 +79,7 @@ def get_qwen_client() -> OpenAI:
         setx DASHSCOPE_API_KEY "sk-xxx"
         setx DASHSCOPE_BASE_URL "https://dashscope.aliyuncs.com/compatible-mode/v1"
     """
-    api_key = os.getenv("DASHSCOPE_API_KEY","your_api_key_here")  #设置qwen3-omni-flash的API KEY
+    api_key = os.getenv("DASHSCOPE_API_KEY", qwen_api_key)  #设置qwen3-omni-flash的API KEY
     if not api_key:
         raise RuntimeError("请先设置环境变量 DASHSCOPE_API_KEY")
 
