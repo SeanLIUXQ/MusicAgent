@@ -12,6 +12,7 @@
     1. cd进\MusicAgent\multiagents\v4\frontend\music-agent\dist目录
     2. 使用python的命令： python -m http.server 5173
     3. 浏览器打开端口 http://localhost:5173/
+    4. python运行v5版本文件夹下的app.py文件
 
 ### 相关说明：
 **1. 在midi2music文件夹内，有midi转音频的相关代码环境**
