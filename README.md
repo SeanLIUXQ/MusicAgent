@@ -8,6 +8,10 @@
 1、使用千问的omni模型，增加了代码模块qwen_omni_audio_to_sonicpi.py  (Qwen-Omni 音频 → Sonic Pi 辅助模块)，实现上传音频转码，并且可以聚合到风格迁移获得反馈的流程中。  
 2、还是用的gui_app.py来配置的，可能后续还得和前端对接修改，配置环境、API Key之后直接启动gui_app.py即可。  
 3、V5版本代码已经上传仓库：MusicAgent/multiagents/MultiAgentV5。  
+### 李睿恒：对v5版本进行前后端的设计，并实现前端打包，现在可以不配置环境打开网页：
+    1. cd进\MusicAgent\multiagents\v4\frontend\music-agent\dist目录
+    2. 使用python的命令： python -m http.server 5173
+    3. 浏览器打开端口 http://localhost:5173/
 
 ### 相关说明：
 **1. 在midi2music文件夹内，有midi转音频的相关代码环境**
