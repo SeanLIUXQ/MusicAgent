@@ -14,6 +14,7 @@
     3. 浏览器打开端口 http://localhost:5173/
     4. python运行v5版本文件夹下的app.py文件
 ### 邹黛青：更新v5 sonic_pi_sender.py 可支持复制代码进sonic pi并自动播放功能
+windows需要安装AutoHotkey v2 
 ### 相关说明：
 **1. 在midi2music文件夹内，有midi转音频的相关代码环境**
 
