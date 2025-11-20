@@ -739,7 +739,7 @@ class MusicGeneratorGUI(QMainWindow):
         """Initialize OpenAI client"""
         # 优先使用环境变量，否则使用默认值
         import os
-        api_key = os.getenv('DEEPSEEK_API_KEY','sk-6712722a83a74cad9f73294f42495d5c')  # 请替换为您的 DeepSeek API Key
+        api_key = os.getenv('DEEPSEEK_API_KEY','Your_Api_Key')  # 请替换为您的 DeepSeek API Key
         base_url = "https://api.deepseek.com/v1"
         
         if api_key == 'your_api_key_here':
