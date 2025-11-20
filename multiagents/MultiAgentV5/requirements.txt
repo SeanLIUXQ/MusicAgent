@@ -29,3 +29,5 @@ chardet>=4.0.0         # 字符编码检测
 joblib>=1.0.0          # 并行处理
 more-itertools>=8.0.0  # 迭代工具
 webcolors>=1.5         # 颜色处理
+
+python-osc>=1.8.0 # 代码复制

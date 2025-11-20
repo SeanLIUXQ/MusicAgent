@@ -528,5 +528,5 @@ if __name__ == '__main__':
     print("4. Save code file with comments")
     print("5. Return: music_prompt, code, midi_path")
     print("=" * 60)
-    print("🚀 Starting server on http://0.0.0.0:5000")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    print("🚀 Starting server on http://0.0.0.0:5001")
+    app.run(debug=True, host='0.0.0.0', port=5001)

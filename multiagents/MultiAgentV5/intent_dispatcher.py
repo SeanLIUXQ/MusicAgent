@@ -308,6 +308,14 @@ def dispatch_to_generate_music(arguments: Dict, client, output_dir: str, log_cal
             log_callback=log_callback
         )
         log(f"✅ v3.multi_agent_generate_sonic_pi 返回: code={'已生成' if code else 'None'}, midi_path={midi_path or 'None'}\n")
+        # 自动把生成的 Sonic Pi 代码发给 Sonic Pi 播放
+        if code:
+            log("📡 尝试将生成的 Sonic Pi 代码发送到 Sonic Pi...\n")
+            try:
+                from sonic_pi_sender import send_code_to_sonic_pi
+                send_code_to_sonic_pi(code, log_callback=log_callback)
+            except Exception as e:
+                log(f"⚠️ 发送到 Sonic Pi 时出现异常（不影响 MIDI 生成）: {e}\n")
         
         return code, midi_path
         
