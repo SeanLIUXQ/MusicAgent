@@ -33,7 +33,7 @@ MAX_AUDIO_FILE_SIZE = 50 * 1024 * 1024  # 50MB
 
 # OpenAI 客户端
 client = OpenAI(
-    api_key='sk-6712722a83a74cad9f73294f42495d5c',
+    api_key='Your_API_KEY', #使用deepseek的API KEY
     base_url="https://api.deepseek.com/v1"
 )
 
@@ -529,4 +529,5 @@ if __name__ == '__main__':
     print("5. Return: music_prompt, code, midi_path")
     print("=" * 60)
     print("🚀 Starting server on http://0.0.0.0:5000")
+
     app.run(debug=True, host='0.0.0.0', port=5000)
