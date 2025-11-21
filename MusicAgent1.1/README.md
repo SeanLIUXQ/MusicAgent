@@ -24,6 +24,7 @@
 1. IDE中新建项目，创建虚拟环境；  
 2. 使用requirements.txt安装package，安装时注意路径；    
 3. 在app.py,gui_app.py中设置好DeepSeek的api_key，在qwen_omni_audio_to_sonicpi.py中设置千问多模态大模型——Omni声音识别的api_key（已经内置，无须再设置）；如遇到网络问题，请检查API Key是否正确设置。  
+### !运行前注意检查API Key是否设置  
 
 ## 前端运行方法 ：
 1. cd进入frontend\music-agent\dist目录  
