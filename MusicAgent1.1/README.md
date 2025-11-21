@@ -1,4 +1,4 @@
-<img width="2159" height="1388" alt="95d5cb3bf58bd57b62d71158568c7f5f" src="https://github.com/user-attachments/assets/0b6ee2e4-7bec-442c-8707-85188647683f" /># MusicAgent 1.1 版本存档
+# MusicAgent 1.1 版本存档
 ## 前端+后端  
 这个版本目前可以稳定运行，较少bug，能实现text->music code的基本功能以及上传音频(.mp3、.wav等)->MID文件。  
 ### 实现功能
