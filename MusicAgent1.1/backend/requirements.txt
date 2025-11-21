@@ -1,0 +1,31 @@
+# MusicAgent v4 Backend 依赖包
+# 安装命令: pip install -r requirements.txt
+
+# 核心依赖
+openai>=1.0.0          # OpenAI API 客户端
+PyQt5>=5.15.0          # GUI 界面
+music21>=9.0.0         # 音乐处理库
+mido>=1.2.10           # MIDI 文件处理（必需）
+
+# Web 服务依赖（如果使用 app.py）
+flask>=2.0.0           # Web 框架
+flask-cors>=3.0.0      # 跨域支持
+
+# 数据处理
+numpy>=1.20.0          # 数值计算
+matplotlib>=3.3.0      # 绘图（music21 依赖）
+
+# 可选依赖（自动化功能）
+# pyautogui>=0.9.50    # 自动化操作
+# pytesseract>=0.3.8   # OCR 文字识别
+# Pillow>=8.0.0        # 图像处理
+# pywin32>=300         # Windows API（仅 Windows）
+
+# JSON 处理（music21 依赖）
+jsonpickle>=2.0.0      # JSON 序列化
+
+# 其他工具
+chardet>=4.0.0         # 字符编码检测
+joblib>=1.0.0          # 并行处理
+more-itertools>=8.0.0  # 迭代工具
+webcolors>=1.5         # 颜色处理
