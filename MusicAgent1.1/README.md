@@ -1,4 +1,4 @@
-# MusicAgent 1.1 版本存档
+<img width="2159" height="1388" alt="95d5cb3bf58bd57b62d71158568c7f5f" src="https://github.com/user-attachments/assets/0b6ee2e4-7bec-442c-8707-85188647683f" /># MusicAgent 1.1 版本存档
 ## 前端+后端  
 这个版本目前可以稳定运行，较少bug，能实现text->music code的基本功能以及上传音频(.mp3、.wav等)->MID文件。  
 ### 实现功能
@@ -11,6 +11,7 @@
 4. 载入MIDI文件功能，可以使用历史生成的.mid文件进行处理，无须重复生成。
 5. *new: 使用AutoHotkey程序，实现自动把生成的代码发送到Sonic PI并播放
 6. *new: 优化前端页面
+<img width="2159" height="1388" alt="95d5cb3bf58bd57b62d71158568c7f5f" src="https://github.com/user-attachments/assets/f8dafffa-5a95-480b-b91d-747e01e14bde" />
 
 
 ## 目前1.1版本存在的问题：  
