@@ -17,7 +17,7 @@
 windows需要安装AutoHotkey v2 
 
 ### Sean: 更新MusicAgent 1.0 稳定版本存档  
-
+### Sean: 更新MusicAgent 1.1 版本存档 
 
 ### 相关说明：
 **1. 在midi2music文件夹内，有midi转音频的相关代码环境**
