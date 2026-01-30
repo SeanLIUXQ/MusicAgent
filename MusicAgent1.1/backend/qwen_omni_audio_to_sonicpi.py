@@ -37,7 +37,7 @@ SUPPORTED_AUDIO_EXTS = {
     ".m4a": "audio/m4a",
     ".ogg": "audio/ogg",
 }
-qwen_api_key = 'sk-e960c6602f8c4f858104d1778fcad1c5'
+qwen_api_key = 'your_api_key'
 # 默认使用的模型名称（可通过环境变量覆盖）
 DEFAULT_MODEL = os.getenv("QWEN_OMNI_MODEL") or "qwen3-omni-flash"
 
