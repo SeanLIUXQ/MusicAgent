@@ -14,7 +14,7 @@ from typing import Dict, List, Optional, Tuple, Any
 from openai import OpenAI
 
 # 默认API Key（直接嵌入代码中）
-DEFAULT_DASHSCOPE_API_KEY = "sk-8ca89d814baa4ff689199c0f6e41571e"
+DEFAULT_DASHSCOPE_API_KEY = "YOUR_API_KEY"
 
 
 def parse_intent_response(text: str) -> Dict:
