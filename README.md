@@ -2,11 +2,23 @@
 
 > 用自然语言描述你想要的音乐，AI帮你生成可播放的音乐代码和MIDI文件！
 
+[![GitHub stars](https://img.shields.io/github/stars/SeanLIUXQ/MusicAgent?style=social)](https://github.com/SeanLIUXQ/MusicAgent/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/SeanLIUXQ/MusicAgent?style=social)](https://github.com/SeanLIUXQ/MusicAgent/network)
+
 ## 📖 项目简介
 
 MusicAgent是一个基于AI的智能音乐生成系统，你只需要用中文描述想要的音乐风格，系统就会自动生成可以在Sonic Pi软件中播放的音乐代码，并导出为MIDI文件。
 
 这是一个**稳定运行版本**，bug较少，已实现text→music code的核心功能以及音频上传转换功能。
+
+## 🚀 快速开始
+
+### 克隆仓库
+
+```bash
+git clone https://github.com/SeanLIUXQ/MusicAgent.git
+cd MusicAgent
+```
 
 **核心功能：**
 - 📝 文字转音乐：输入"一首轻柔的钢琴曲，C大调，慢速"，AI自动生成音乐
@@ -18,7 +30,7 @@ MusicAgent是一个基于AI的智能音乐生成系统，你只需要用中文�
 
 ---
 
-## 🚀 5分钟快速上手
+## 📋 完整安装配置指南
 
 ### 第一步：安装Sonic Pi
 
@@ -51,6 +63,11 @@ source venv/bin/activate
 
 ### 第四步：安装项目依赖
 
+**进入backend目录：**
+```bash
+cd backend
+```
+
 **方法A - 自动安装（推荐）：**
 ```bash
 # Windows用户双击运行
@@ -65,7 +82,7 @@ pip install -r requirements.txt
 pip install openai PyQt5 music21 mido flask
 ```
 
-**⚠️ 安装时注意路径** - 确保在项目根目录下运行安装命令
+**⚠️ 安装时注意路径** - 确保在`backend`目录下运行安装命令
 
 ### 第五步：配置API密钥
 
@@ -88,8 +105,8 @@ export DEEPSEEK_API_KEY="sk-your-api-key-here"
 ```
 
 **配置方式二 - 修改代码：**
-- 打开 `gui_app.py`，找到第318行或搜索 `init_client`
-- 打开 `app.py`，同样查找 `init_client` 或 API Key 配置部分
+- 打开 `backend/gui_app.py`，找到第318行或搜索 `init_client`
+- 打开 `backend/app.py`，同样查找 `init_client` 或 API Key 配置部分
 - 替换为你的API密钥：
 ```python
 api_key = 'sk-your-api-key-here'  # 替换为你的密钥
@@ -97,11 +114,16 @@ api_key = 'sk-your-api-key-here'  # 替换为你的密钥
 
 #### 5.2 千问Omni API（音频功能，已内置）
 
-音频转代码功能使用千问Omni多模态大模型，API Key已内置在 `qwen_omni_audio_to_sonicpi.py` 中，**无需额外配置**。
+音频转代码功能使用千问Omni多模态大模型，API Key已内置在 `backend/qwen_omni_audio_to_sonicpi.py` 中，**无需额外配置**。
 
 **⚠️ 运行前务必检查API Key是否正确设置！**
 
 ### 第六步：启动应用
+
+**⚠️ 确保已进入backend目录：**
+```bash
+cd backend
+```
 
 #### 方式A - 桌面GUI应用（推荐，功能最全）
 
@@ -115,14 +137,15 @@ python gui_app.py
 
 #### 方式B - Web应用（前端+后端）
 
-**步骤1 - 启动后端：**
+**步骤1 - 启动后端（在backend目录）：**
 ```bash
+cd backend
 python app.py
 ```
 
 **步骤2 - 启动前端（新开终端）：**
 ```bash
-# 进入前端目录
+# 从项目根目录进入前端目录
 cd frontend/music-agent/dist
 
 # 启动前端服务器
@@ -242,21 +265,26 @@ python -m http.server 5173
 ## 📁 项目结构
 
 ```
-MusicAgent-1.1/
-├── gui_app.py              # 桌面应用主程序（PyQt5界面）
-├── app.py                  # Web应用主程序（Flask后端）
-├── v3.py                   # 多智能体音乐生成核心逻辑
-├── intent_dispatcher.py    # 意图理解和调度模块
-├── style_transfer.py       # 风格转换模块
-├── qwen_omni_audio_to_sonicpi.py  # 音频转代码模块
-├── requirements.txt        # Python依赖列表
-├── 启动应用.bat            # 一键启动脚本（Windows）
-├── 安装依赖.bat            # 一键安装脚本（Windows）
-├── 检查依赖.py            # 依赖检查工具
-├── midi_output/           # MIDI文件输出目录
-└── frontend/              # Web前端文件（可选）
-    └── music-agent/
-        └── dist/          # 前端构建文件
+MusicAgent/
+├── backend/                    # 后端代码目录
+│   ├── app.py                  # Flask Web API主程序
+│   ├── gui_app.py              # PyQt5桌面应用主程序
+│   ├── v3.py                   # 多智能体音乐生成核心逻辑
+│   ├── intent_dispatcher.py    # 意图理解和调度模块
+│   ├── style_transfer.py       # 风格转换模块
+│   ├── qwen_omni_audio_to_sonicpi.py  # 音频转代码模块
+│   ├── requirements.txt        # Python依赖列表
+│   ├── 启动应用.bat            # Windows一键启动脚本
+│   ├── 安装依赖.bat            # Windows一键安装脚本
+│   ├── 检查依赖.py            # 依赖检查工具
+│   └── midi_output/           # MIDI文件输出目录
+│
+├── frontend/                   # 前端代码目录
+│   └── music-agent/
+│       └── dist/              # Vue.js前端构建文件
+│           └── index.html     # Web界面入口
+│
+└── README.md                  # 项目说明文档（本文件）
 ```
 
 ---
@@ -267,7 +295,7 @@ MusicAgent-1.1/
 
 **导出MIDI：**
 - 每次生成音乐后自动保存为MIDI文件
-- 文件位置：`midi_output/` 目录
+- 文件位置：`backend/midi_output/` 目录
 - 文件命名：`music_YYYYMMDD_HHMMSS.mid`
 
 **加载历史MIDI：**
@@ -281,13 +309,17 @@ MusicAgent-1.1/
 
 **步骤1 - 启动后端API服务：**
 ```bash
+# 进入backend目录
+cd backend
+
+# 启动Flask后端
 python app.py
 # 后端将运行在默认端口
 ```
 
 **步骤2 - 启动前端界面（新开终端）：**
 ```bash
-# 进入前端目录
+# 从项目根目录进入前端目录
 cd frontend/music-agent/dist
 
 # 启动前端服务器
@@ -300,7 +332,7 @@ python -m http.server 5173
 ```
 
 **架构说明：**
-- **前端**（端口5173）：用户界面，负责展示和交互
+- **前端**（端口5173）：Vue.js构建的用户界面，负责展示和交互
 - **后端**（Flask API）：处理AI请求，生成音乐代码
 - 前后端通过HTTP API通信
 
@@ -393,8 +425,9 @@ pip install 模块名
 ### Q6: MIDI文件在哪里？
 
 **A:** MIDI文件自动保存在：
-- 桌面应用：`midi_output/` 目录
+- 位置：`backend/midi_output/` 目录
 - 文件名格式：`music_YYYYMMDD_HHMMSS.mid`
+- 可以用任何支持MIDI的软件打开
 
 ### Q7: 风格转换没有效果？
 
@@ -430,6 +463,10 @@ pip install 模块名
 
 运行依赖检查工具：
 ```bash
+# 进入backend目录
+cd backend
+
+# 运行检查脚本
 python 检查依赖.py
 ```
 
@@ -611,6 +648,12 @@ pip install PyQt5
    - 用途：音频文件转MIDI
    - 已内置API密钥
 
+---
+
+## 👥 贡献者
+
+- **刘新泉 (@SeanLIUXQ)** - 后端开发与环境配置
+- **李睿恒 (@Water29)** - 前端开发与界面设计
 
 ---
 
@@ -655,12 +698,13 @@ pip install PyQt5
 
 **快速启动：**
 ```bash
+cd backend
 python gui_app.py
 ```
 
 **需要帮助？**
 1. 查看"常见问题"部分
-2. 运行 `python 检查依赖.py` 诊断问题
+2. 运行 `cd backend && python 检查依赖.py` 诊断问题
 3. 参考详细技术文档
 
 ---
