@@ -112,9 +112,9 @@ export DEEPSEEK_API_KEY="sk-your-api-key-here"
 api_key = 'sk-your-api-key-here'  # 替换为你的密钥
 ```
 
-#### 5.2 千问Omni API（音频功能，已内置）
+#### 5.2 千问Omni API（音频功能，需调用API KEY）
 
-音频转代码功能使用千问Omni多模态大模型，API Key已内置在 `backend/qwen_omni_audio_to_sonicpi.py` 中，**无需额外配置**。
+音频转代码功能使用千问Omni多模态大模型，API Key **需额外配置**。
 
 **⚠️ 运行前务必检查API Key是否正确设置！**
 
@@ -646,7 +646,7 @@ pip install PyQt5
 
 3. **千问Omni** - 音频理解
    - 用途：音频文件转MIDI
-   - 已内置API密钥
+   - 需自己设置api key
 
 ---
 
