@@ -3,15 +3,35 @@
 > 用自然语言描述你想要的音乐，AI帮你生成可播放的音乐代码和MIDI文件！
 
 [![GitHub stars](https://img.shields.io/github/stars/SeanLIUXQ/MusicAgent?style=social)](https://github.com/SeanLIUXQ/MusicAgent/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/SeanLIUXQ/MusicAgent?style=social)](https://github.com/SeanLIUXQ/MusicAgent/network)
+[![Python 81.4%](https://img.shields.io/badge/Python-81.4%25-blue)](https://github.com/SeanLIUXQ/MusicAgent)
+[![Vue 16.6%](https://img.shields.io/badge/Vue-16.6%25-green)](https://github.com/SeanLIUXQ/MusicAgent)
+
+---
 
 ## 📖 项目简介
 
-MusicAgent是一个基于AI的智能音乐生成系统，你只需要用中文描述想要的音乐风格，系统就会自动生成可以在Sonic Pi软件中播放的音乐代码，并导出为MIDI文件。
+MusicAgent是一个基于AI的智能音乐生成系统。通过调用大语言模型(LLM)，结合用户的提示词，实现：
+- 文字描述转换为Sonic Pi音乐代码
+- 音频文件风格转换
+- MIDI文件生成和导出
 
-这是一个**稳定运行版本**，bug较少，已实现text→music code的核心功能以及音频上传转换功能。
+**核心特性：**
+- ✅ **稳定运行** - Bug较少，核心功能完善
+- ✅ **Text→Code** - 自然语言生成音乐代码
+- ✅ **Audio→MIDI** - 音频文件转换为MIDI
+- ✅ **双界面支持** - 桌面GUI + Web前后端
+
+---
 
 ## 🚀 快速开始
+
+### 环境要求
+
+| 软件 | 版本要求 | 说明 |
+|------|---------|------|
+| Python | ≥ 3.8 | 核心运行环境 |
+| Sonic Pi | 最新版 | 音乐播放软件 |
+| DeepSeek API Key | - | 必需配置 |
 
 ### 克隆仓库
 
@@ -20,82 +40,39 @@ git clone https://github.com/SeanLIUXQ/MusicAgent.git
 cd MusicAgent
 ```
 
-**核心功能：**
-- 📝 文字转音乐：输入"一首轻柔的钢琴曲，C大调，慢速"，AI自动生成音乐
-- 🎼 音频转代码：上传MP3/WAV文件，AI分析并生成对应的音乐代码
-- 🎨 风格转换：把现有音乐改成爵士风、古典风等不同风格
-- 🔄 反馈优化：不满意？告诉AI哪里需要改进，自动调整
-- 💾 MIDI导出：生成的音乐可以保存为标准MIDI文件
-- 📋 代码复制：一键复制生成的代码到剪贴板，方便粘贴到Sonic Pi
-
----
-
-## 📋 完整安装配置指南
-
-### 第一步：安装Sonic Pi
-
-1. 访问 [Sonic Pi官网](https://sonic-pi.net/) 下载并安装
-2. 打开Sonic Pi，确保能正常运行
-
-### 第二步：安装Python环境
-
-**系统要求：** Python 3.8 或更高版本
-
-**检查Python版本：**
-```bash
-python --version
-```
-
-如果没有安装Python，请访问 [Python官网](https://www.python.org/) 下载安装。
-
-### 第三步：创建虚拟环境（推荐）
-
-```bash
-# 在项目目录下创建虚拟环境
-python -m venv venv
-
-# 激活虚拟环境
-# Windows:
-venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
-```
-
-### 第四步：安装项目依赖
+### 安装依赖
 
 **进入backend目录：**
 ```bash
 cd backend
 ```
 
-**方法A - 自动安装（推荐）：**
+**方法A - Windows自动安装（推荐）：**
 ```bash
-# Windows用户双击运行
+# 双击运行
 安装依赖.bat
+```
 
-# Mac/Linux用户在终端运行
+**方法B - 手动安装：**
+```bash
 pip install -r requirements.txt
 ```
 
-**方法B - 手动安装核心包：**
-```bash
-pip install openai PyQt5 music21 mido flask
-```
+**核心依赖包：**
+- `openai` - DeepSeek API调用
+- `PyQt5` - 桌面GUI界面
+- `music21` - 音乐理论处理
+- `mido` - MIDI文件操作
+- `flask` - Web后端服务
 
-**⚠️ 安装时注意路径** - 确保在`backend`目录下运行安装命令
+### 配置API密钥
 
-### 第五步：配置API密钥
+**DeepSeek API（必需）：**
 
-本项目使用多个AI服务，需要配置API密钥：
+1. 访问 [platform.deepseek.com](https://platform.deepseek.com/) 获取API Key
+2. 配置方式（二选一）：
 
-#### 5.1 DeepSeek API（必需）
-
-**获取API密钥：**
-1. 访问 [DeepSeek平台](https://platform.deepseek.com/)
-2. 注册并登录账号
-3. 在控制台获取API Key
-
-**配置方式一 - 环境变量（推荐）：**
+**方式1 - 环境变量（推荐）：**
 ```bash
 # Windows PowerShell
 $env:DEEPSEEK_API_KEY="sk-your-api-key-here"
@@ -104,569 +81,350 @@ $env:DEEPSEEK_API_KEY="sk-your-api-key-here"
 export DEEPSEEK_API_KEY="sk-your-api-key-here"
 ```
 
-**配置方式二 - 修改代码：**
-- 打开 `backend/gui_app.py`，找到第318行或搜索 `init_client`
-- 打开 `backend/app.py`，同样查找 `init_client` 或 API Key 配置部分
-- 替换为你的API密钥：
+**方式2 - 修改代码：**
 ```python
-api_key = 'sk-your-api-key-here'  # 替换为你的密钥
+# 在 backend/gui_app.py 和 backend/app.py 中
+# 找到 init_client 方法，替换API密钥
+api_key = 'sk-your-api-key-here'
 ```
 
-#### 5.2 千问Omni API（音频功能，需调用API KEY）
+**千问Omni API（音频功能）：**
+- API Key已内置在 `backend/qwen_omni_audio_to_sonicpi.py`
+- **无需额外配置**
 
-音频转代码功能使用千问Omni多模态大模型，API Key **需额外配置**。
+---
 
-**⚠️ 运行前务必检查API Key是否正确设置！**
+## 💻 运行应用
 
-### 第六步：启动应用
+### 方式A：桌面GUI应用（推荐）
 
-**⚠️ 确保已进入backend目录：**
 ```bash
 cd backend
-```
 
-#### 方式A - 桌面GUI应用（推荐，功能最全）
-
-```bash
-# Windows用户双击运行
+# Windows - 双击运行
 启动应用.bat
 
-# 或者手动运行
+# 或手动运行
 python gui_app.py
 ```
 
-#### 方式B - Web应用（前端+后端）
+**功能：**
+- ✅ 文字生成音乐代码
+- ✅ 音频文件上传转换
+- ✅ 风格转换
+- ✅ 反馈优化
+- ✅ MIDI导出
 
-**步骤1 - 启动后端（在backend目录）：**
+### 方式B：Web应用（前后端分离）
+
+**终端1 - 启动后端：**
 ```bash
 cd backend
 python app.py
 ```
 
-**步骤2 - 启动前端（新开终端）：**
+**终端2 - 启动前端：**
 ```bash
-# 从项目根目录进入前端目录
 cd frontend/music-agent/dist
-
-# 启动前端服务器
 python -m http.server 5173
 ```
 
-**步骤3 - 访问应用：**
-```
-浏览器打开 http://localhost:5173/
-```
+**访问：** http://localhost:5173
 
-**前端页面预览：**
+**前端界面预览：**
 
-![MusicAgent前端界面](https://github.com/user-attachments/assets/f8dafffa-5a95-480b-b91d-747e01e14bde)
+![MusicAgent前端](https://private-user-images.githubusercontent.com/205925075/517274752-f8dafffa-5a95-480b-b91d-747e01e14bde.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NzA3ODQ1NjksIm5iZiI6MTc3MDc4NDI2OSwicGF0aCI6Ii8yMDU5MjUwNzUvNTE3Mjc0NzUyLWY4ZGFmZmZhLTVhOTUtNDgwYi1iOTFkLTc0N2UwMWUxNGJkZS5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjYwMjExJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI2MDIxMVQwNDMxMDlaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0xNDc0ZWEyODU5NWRhMzVlMWVkMWE4MmIwYjgxZDk0NjNiZjliMzg3YTE5OTRmNTVjOGY5NWIwZTc5MmIzZjRiJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.Z5qnuec4g8i9NYZJ4iKjrnyRdCZi4xs3og5FBNcFMlo)
 
 ---
 
-## 💡 使用指南
+## 📋 使用指南
 
 ### 1. 文字生成音乐
 
-**步骤：**
-1. 在输入框输入音乐描述，例如：
-   - "一首平静的钢琴独奏，C大调，慢速，梦幻风格"
-   - "快节奏的电子音乐，使用鼓点和合成器"
-   - "爵士风格的贝斯线，配合钢琴和弦"
+**示例输入：**
+```
+一首平静的钢琴独奏，C大调，60 BPM，梦幻风格，适合冥想
+```
 
-2. 点击"生成音乐代码"按钮
+**流程：**
+1. 在界面输入音乐描述
+2. 点击"生成音乐代码"
+3. 等待3-5分钟（AI智能体协作创作）
+4. 复制生成的Sonic Pi代码
+5. 粘贴到Sonic Pi并运行
 
-3. 等待3-5分钟，系统会：
-   - 分析你的描述
-   - AI智能体协作创作
-   - 生成Sonic Pi代码
-   - 自动编译为MIDI文件
-
-4. 代码生成完成后：
-   - 点击"复制代码"按钮（或手动选择复制）
-   - 打开Sonic Pi
-   - 粘贴代码到编辑器
-   - 点击Sonic Pi的"运行"按钮播放
+**生成内容：**
+- Sonic Pi代码（可直接运行）
+- MIDI文件（保存在`backend/midi_output/`）
 
 ### 2. 音频转代码
 
-**步骤：**
-1. 点击"上传音频"按钮
-2. 选择MP3或WAV文件
-3. 系统自动分析音频并生成对应的音乐代码
-4. 复制代码到Sonic Pi播放
+**支持格式：** MP3, WAV
+
+**流程：**
+1. 点击"上传音频"
+2. 选择音频文件
+3. 系统自动分析并生成代码
+4. 复制到Sonic Pi运行
 
 ### 3. 风格转换
 
-**前提：** 已经生成了一段音乐代码
+**前提：** 已生成音乐代码
 
-**步骤：**
-1. 点击"风格迁移"按钮
-2. 输入目标风格，例如：
-   - "转换为爵士风格"
-   - "改成轻柔的风格"
-   - "变成摇滚风格"
-3. 等待生成新版本代码
-4. 复制到Sonic Pi播放
+**示例：**
+```
+转换为爵士风格
+改成轻柔的风格
+变成摇滚风格
+```
 
 ### 4. 反馈优化
 
-**前提：** 已经生成了音乐，但不满意
+**示例反馈：**
+```
+速度太慢了，再快一点
+音调太高，降低一些
+缺少节奏感，加入鼓点
+```
 
-**步骤：**
-1. 点击"反馈"按钮
-2. 输入具体的改进意见，例如：
-   - "速度太慢了，再快一点"
-   - "音调太高，降低一些"
-   - "缺少节奏感，加入鼓点"
-3. 系统根据反馈调整音乐
-4. 通常需要2-3次迭代才能达到理想效果
+**建议：** 迭代2-3次达到最佳效果
+
+---
+
+## 🏗️ 项目结构
+
+```
+MusicAgent/
+├── backend/                    # 后端代码
+│   ├── app.py                  # Flask Web API
+│   ├── gui_app.py              # PyQt5桌面应用
+│   ├── v3.py                   # 多智能体核心逻辑
+│   ├── intent_dispatcher.py    # 意图理解模块
+│   ├── style_transfer.py       # 风格转换模块
+│   ├── qwen_omni_audio_to_sonicpi.py  # 音频转代码
+│   ├── requirements.txt        # Python依赖
+│   ├── 安装依赖.bat            # Windows安装脚本
+│   ├── 启动应用.bat            # Windows启动脚本
+│   └── midi_output/           # MIDI输出目录
+│
+├── frontend/                   # 前端代码 (Vue.js)
+│   └── music-agent/
+│       └── dist/              # 构建文件
+│
+└── README.md                  # 项目文档
+```
 
 ---
 
 ## 🎯 核心技术
 
-### 多智能体协作系统
-
-系统使用5个AI智能体协作创作音乐：
+### 多智能体协作
 
 ```
 用户输入
     ↓
-1. 意图理解 (Intent Detector)
-   识别用户想做什么：生成/转换/修改
+意图理解 (Intent Detector)
     ↓
-2. 翻译官 (Translator)
-   把口语化描述转为专业音乐术语
+翻译官 (Translator) → 专业音乐术语
     ↓
-3. 作曲家 (Composer)
-   根据要求创作音乐代码
+作曲家 (Composer) → 创作代码
     ↓
-4. 评论家 (Critic)
-   评价作品质量，提出改进建议
+评论家 (Critic) → 评价质量
     ↓
-5. 编曲师 (Arranger)
-   根据评价优化和完善代码
+编曲师 (Arranger) → 优化完善
     ↓
-6. 编译器 (Compiler)
-   生成MIDI文件
+编译器 (Compiler) → 生成MIDI
     ↓
 输出：Sonic Pi代码 + MIDI文件
 ```
 
-### 意图理解增强
+### AI模型
 
-系统集成了通义千问的意图理解模型，能够：
-- 自动识别用户想生成、转换还是修改音乐
-- 提取关键参数（风格、节奏、调性、乐器等）
-- 智能调度到对应的功能模块
-
----
-
-## 📁 项目结构
-
-```
-MusicAgent/
-├── backend/                    # 后端代码目录
-│   ├── app.py                  # Flask Web API主程序
-│   ├── gui_app.py              # PyQt5桌面应用主程序
-│   ├── v3.py                   # 多智能体音乐生成核心逻辑
-│   ├── intent_dispatcher.py    # 意图理解和调度模块
-│   ├── style_transfer.py       # 风格转换模块
-│   ├── qwen_omni_audio_to_sonicpi.py  # 音频转代码模块
-│   ├── requirements.txt        # Python依赖列表
-│   ├── 启动应用.bat            # Windows一键启动脚本
-│   ├── 安装依赖.bat            # Windows一键安装脚本
-│   ├── 检查依赖.py            # 依赖检查工具
-│   └── midi_output/           # MIDI文件输出目录
-│
-├── frontend/                   # 前端代码目录
-│   └── music-agent/
-│       └── dist/              # Vue.js前端构建文件
-│           └── index.html     # Web界面入口
-│
-└── README.md                  # 项目说明文档（本文件）
-```
-
----
-
-## ⚙️ 高级功能
-
-### MIDI文件管理
-
-**导出MIDI：**
-- 每次生成音乐后自动保存为MIDI文件
-- 文件位置：`backend/midi_output/` 目录
-- 文件命名：`music_YYYYMMDD_HHMMSS.mid`
-
-**加载历史MIDI：**
-- 可以重新加载之前生成的MIDI文件
-- 避免重复生成，直接进行风格转换或优化
-- 支持导入到其他音乐软件（DAW）使用
-
-### Web界面使用
-
-**启动Web服务（前端+后端分离架构）：**
-
-**步骤1 - 启动后端API服务：**
-```bash
-# 进入backend目录
-cd backend
-
-# 启动Flask后端
-python app.py
-# 后端将运行在默认端口
-```
-
-**步骤2 - 启动前端界面（新开终端）：**
-```bash
-# 从项目根目录进入前端目录
-cd frontend/music-agent/dist
-
-# 启动前端服务器
-python -m http.server 5173
-```
-
-**步骤3 - 访问应用：**
-```
-浏览器打开：http://localhost:5173/
-```
-
-**架构说明：**
-- **前端**（端口5173）：Vue.js构建的用户界面，负责展示和交互
-- **后端**（Flask API）：处理AI请求，生成音乐代码
-- 前后端通过HTTP API通信
-
-**优势：**
-- 界面更美观，用户体验更好
-- 支持多人同时使用（共享后端）
-- 可以部署到服务器供远程访问
+| 模型 | 用途 | 配置 |
+|------|------|------|
+| DeepSeek | 音乐代码生成 | 需要API Key |
+| 通义千问 | 意图理解 | 可选 |
+| 千问Omni | 音频分析 | 已内置 |
 
 ---
 
 ## ⚠️ 已知问题
 
-### 当前版本（1.0）存在的问题
-
-1. **自动化功能**
-   - 暂时未加入自动化运行脚本与Sonic Pi联动
-   - 代码生成后需要手动复制粘贴到Sonic Pi
-
-2. **前端优化**
-   - 页面标题需要优化
-   - 窗口布局需要更大一些
-   - 字体需要调大以提高可读性
-
-3. **日志语言**
-   - 后端功能模块的运行日志仍为中文
-   - 后续版本将改为英文以提高可读性
-
-4. **稳定性问题**
-   - `反馈优化模块`有时会没有反应，需要多测试几次
-   - `风格迁移模块`偶尔响应不稳定
-   - **建议**：如遇到无响应，可以重试或重启应用
-
-**注意事项：** 后续如有改进请另外创建不同版本（如MusicAgent 1.x），避免覆盖造成难以定位问题。
+| 问题 | 说明 | 解决方案 |
+|------|------|---------|
+| 代码生成时间长 | 3-5分钟 | 正常现象，请耐心等待 |
+| 反馈模块偶尔无响应 | 稳定性问题 | 等待30秒或重试 |
+| 需手动复制代码 | 未实现自动化 | 手动复制到Sonic Pi |
+| 日志为中文 | 待优化 | 后续版本改进 |
 
 ---
 
 ## ❓ 常见问题
 
-### Q1: 为什么生成音乐需要这么长时间？
+<details>
+<summary><b>Q1: 为什么生成需要3-5分钟？</b></summary>
 
-**A:** AI需要经过多个智能体的协作和迭代：
-- 理解你的描述
-- 翻译成音乐术语
-- 创作初稿
-- 评价和改进
-- 编译成MIDI
+AI需要经过多个智能体协作：理解描述 → 翻译术语 → 创作初稿 → 评价改进 → 编译MIDI
 
-生成时间通常在3-5分钟，这是正常现象。请耐心等待，不要重复点击生成按钮。
+这是正常现象，请耐心等待，不要重复点击。
+</details>
 
-### Q2: 生成的代码在Sonic Pi中无法播放？
+<details>
+<summary><b>Q2: 代码在Sonic Pi中无法播放？</b></summary>
 
-**A:** 可能的原因：
-1. **语法错误**：点击"反馈"按钮，告诉AI具体错误信息
-2. **音色不支持**：某些乐器可能在Sonic Pi中不存在，尝试反馈修改
-3. **代码不完整**：等待生成完全结束再复制
-4. **复制错误**：确保完整复制所有代码，包括开头和结尾
+可能原因：
+1. **语法错误** - 使用反馈功能告诉AI错误信息
+2. **音色不支持** - 尝试反馈修改乐器
+3. **代码不完整** - 确保完整复制所有代码
 
-**建议：** 使用反馈功能2-3次通常能解决问题。
+建议：使用反馈功能2-3次通常能解决
+</details>
 
-### Q3: 如何将代码复制到Sonic Pi？
+<details>
+<summary><b>Q3: API认证失败（Error 401）？</b></summary>
 
-**A:** 简单3步：
-1. **复制代码**：在MusicAgent界面中，代码生成完成后，全选代码并复制（Ctrl+C / Cmd+C）
-2. **打开Sonic Pi**：确保Sonic Pi应用已经打开
-3. **粘贴运行**：
-   - 在Sonic Pi编辑器中粘贴代码（Ctrl+V / Cmd+V）
-   - 点击Sonic Pi顶部的"Run"按钮
-   - 等待几秒，音乐开始播放
+检查项：
+1. `DEEPSEEK_API_KEY`环境变量是否正确设置
+2. API密钥是否有效且有余额
+3. 参考配置章节重新设置
+</details>
 
-**提示**：如果有多个工作区（Buffer），确保粘贴到正确的工作区。
+<details>
+<summary><b>Q4: MIDI文件保存在哪里？</b></summary>
 
-### Q4: API认证失败（Error 401）？
+位置：`backend/midi_output/`
+格式：`music_YYYYMMDD_HHMMSS.mid`
+</details>
 
-**A:** API密钥配置问题：
-1. 检查是否正确设置了`DEEPSEEK_API_KEY`环境变量
-2. 确认API密钥有效且有余额
-3. 参考"第五步：配置API密钥"重新配置
+<details>
+<summary><b>Q5: 反馈/风格转换无响应？</b></summary>
 
-### Q5: 找不到某个Python模块？
+临时解决：
+1. 等待30秒-1分钟
+2. 重新提交或重启应用
+3. 每次只提一个具体要求
 
-**A:** 依赖安装不完整：
-```bash
-# 重新安装所有依赖
-pip install -r requirements.txt
+这是已知问题，后续版本会优化
+</details>
 
-# 或者单独安装缺失的模块
-pip install 模块名
+---
+
+## 💡 使用技巧
+
+### 描述要点
+
+**✅ 好的描述：**
+```
+一首轻柔的钢琴独奏，C大调，60 BPM，梦幻风格，适合冥想
 ```
 
-### Q6: MIDI文件在哪里？
+**❌ 不好的描述：**
+```
+一首好听的音乐
+```
 
-**A:** MIDI文件自动保存在：
-- 位置：`backend/midi_output/` 目录
-- 文件名格式：`music_YYYYMMDD_HHMMSS.mid`
-- 可以用任何支持MIDI的软件打开
+### 音乐术语参考
 
-### Q7: 风格转换没有效果？
+| 类型 | 示例 |
+|------|------|
+| 调性 | C大调、A小调、G大调 |
+| 节奏 | 慢速(60-80 BPM)、中速(90-120 BPM)、快速(130+ BPM) |
+| 风格 | 古典、爵士、摇滚、电子、民谣 |
+| 乐器 | 钢琴、吉他、鼓、贝斯、合成器 |
 
-**A:** 确保：
-1. 已经生成了原始音乐代码
-2. 在风格描述中明确说明目标风格
-3. 使用反馈功能进一步调整
+### 最佳实践
 
-**注意**：如果风格转换模块没有反应，请稍等片刻或重试一次。这是已知的稳定性问题，后续版本会改进。
+1. **分步调整**
+   - 第1次：生成基础框架
+   - 第2次：调整节奏速度
+   - 第3次：优化音色层次
 
-### Q8: 反馈优化/风格转换功能无响应？
+2. **保存版本**
+   - 及时保存满意的MIDI文件
+   - 避免过度修改丢失好版本
 
-**A:** 这是当前版本的已知问题：
-
-**临时解决方案：**
-1. **等待一段时间**（30秒-1分钟）- 有时只是响应较慢
-2. **重新尝试**：点击"取消"后重新提交
-3. **重启应用**：如果多次尝试无效，重启MusicAgent应用
-4. **检查日志**：查看应用日志是否有错误信息
-
-**最佳实践：**
-- 每次只提一个具体的修改要求
-- 避免同时进行多个操作
-- 给系统足够的响应时间
-
-这个问题会在后续版本中优化改进。
+3. **巧用风格转换**
+   - 先生成满意的结构
+   - 再尝试不同风格
+   - 快速对比效果
 
 ---
 
 ## 🔧 故障排除
 
-### 检查系统依赖
+### 依赖问题
 
-运行依赖检查工具：
+**检查依赖：**
 ```bash
-# 进入backend目录
 cd backend
-
-# 运行检查脚本
 python 检查依赖.py
 ```
 
-会自动检测：
-- Python版本
-- 必需的Python包
-- 可选的Python包
-- API密钥配置
-
-### 常见错误修复
-
-**错误：ModuleNotFoundError**
+**常见错误修复：**
 ```bash
-pip install 缺失的模块名
-```
+# ModuleNotFoundError
+pip install <模块名>
 
-**错误：MIDI编译失败**
-```bash
+# MIDI编译失败
 pip install mido music21
-```
 
-**错误：GUI无法启动**
-```bash
+# GUI无法启动
 pip install PyQt5
 ```
 
-**错误：网络连接超时**
+### 网络问题
+
 - 检查网络连接
 - 确认能访问DeepSeek API
-- 考虑使用代理
-
----
-
-## 📊 性能优化建议
-
-### 提高生成速度
-
-1. **使用更快的API模型**（如有）
-2. **减少迭代次数**：在Critic配置中降低评分阈值
-3. **禁用意图理解**：直接调用生成函数（需修改代码）
-
-### 提高生成质量
-
-1. **提供详细的描述**：
-   - ❌ "一首音乐"
-   - ✅ "一首轻柔的钢琴独奏，C大调，60 BPM，适合冥想"
-
-2. **使用音乐术语**：
-   - 调性：C大调、A小调
-   - 节奏：慢速(60-80 BPM)、中速(90-120 BPM)、快速(130+ BPM)
-   - 风格：古典、爵士、摇滚、电子、民谣
-
-3. **充分利用反馈功能**：
-   - 不要一次性提太多要求
-   - 每次反馈聚焦1-2个改进点
-   - 迭代2-3次达到理想效果
-
----
-
-## 🌟 使用技巧
-
-### 最佳实践
-
-1. **描述要具体**
-   ```
-   ❌ "一首好听的音乐"
-   ✅ "一首平静的钢琴独奏，C大调，60 BPM，梦幻风格，适合睡前听"
-   ```
-
-2. **分步调整**
-   ```
-   第1次：生成基础框架
-   第2次：调整节奏和速度
-   第3次：优化音色和层次
-   ```
-
-3. **保存中间版本**
-   - 满意的版本及时保存MIDI文件
-   - 避免过度修改丢失好的版本
-
-4. **利用风格转换**
-   - 先生成一个满意的结构
-   - 再用风格转换尝试不同风格
-   - 快速对比哪种风格更好
-
-### 音乐描述模板
-
-**古典风格：**
-```
-一首古典风格的钢琴奏鸣曲，C大调，Allegro速度（132 BPM），
-使用奏鸣曲式结构，优雅而富有戏剧性
-```
-
-**爵士风格：**
-```
-一首爵士风格的即兴演奏，降B大调，Swing节奏（120 BPM），
-使用萨克斯主奏，钢琴、贝斯和鼓点伴奏，轻松随性
-```
-
-**电子音乐：**
-```
-一首电子舞曲(EDM)，G小调，快速节奏（128 BPM），
-使用合成器、重低音和动感鼓点，适合健身
-```
-
-**轻音乐：**
-```
-一首轻音乐背景音，C大调，慢速（70 BPM），
-使用钢琴和弦乐，平静舒缓，适合工作学习
-```
-
----
-
-## 📝 版本说明
-
-### 当前版本：MusicAgent 1.0 稳定版
-
-**主要功能：**
-- ✅ 文字转音乐代码（核心功能）
-- ✅ 音频转代码（支持MP3、WAV）
-- ✅ 风格转换
-- ✅ 反馈优化
-- ✅ MIDI导出
-- ✅ MIDI文件加载
-- ✅ 意图理解增强
-- ✅ 桌面GUI应用
-- ✅ Web界面（前端+后端）
-
-**技术特性：**
-- 多智能体协作系统（5个AI角色）
-- 通义千问意图理解模型
-- 千问Omni音频分析
-- DeepSeek AI驱动
-- Sonic Pi代码生成
-- 标准MIDI文件输出
-
-**稳定性：**
-- ✅ 当前可稳定运行
-- ✅ Bug较少
-- ✅ 核心功能完善
-
-### 历史版本（已整合）
-
-本README整合了以下开发版本的所有功能：
-- v4 backend版本（意图理解功能）
-- v3版本（多智能体系统）
-- v2版本（GUI界面）
-- 早期版本（基础功能）
-
-所有功能都已集成到MusicAgent 1.0中，无需使用旧版本。
+- 必要时使用代理
 
 ---
 
 ## 📚 技术文档
 
-### 开发者文档
+### API服务
 
-详细技术文档请参考：
-- `README_INTENT.md` - 意图理解功能详解
-- `INTENT_INTEGRATION_SUMMARY.md` - 系统集成文档
-- `README_GUI.md` - GUI应用开发文档
-- `API_KEY_配置指南.md` - API配置详细说明
+| 服务 | 用途 | 链接 |
+|------|------|------|
+| DeepSeek | 音乐生成 | https://platform.deepseek.com |
+| 通义千问 | 意图理解 | https://dashscope.aliyun.com |
+| Sonic Pi | 音乐播放 | https://sonic-pi.net |
 
-### API使用
+### 开发文档
 
-系统使用以下API服务：
-
-1. **DeepSeek API** - 主要AI模型
-   - 网站：https://platform.deepseek.com/
-   - 用途：音乐代码生成
-
-2. **通义千问** - 意图理解
-   - 网站：https://dashscope.aliyun.com/
-   - 用途：理解用户意图
-   - 模型：tongyi-intent-detect-v3
-   - 免费额度：100万Token（90天有效）
-
-3. **千问Omni** - 音频理解
-   - 用途：音频文件转MIDI
-   - 需自己设置api key
+- `README_INTENT.md` - 意图理解详解
+- `INTENT_INTEGRATION_SUMMARY.md` - 系统集成
+- `README_GUI.md` - GUI应用开发
 
 ---
 
-## 🤝 贡献与反馈
+## 📝 版本信息
 
-### 报告问题
+**当前版本：** v1.0 (稳定版)  
+**发布时间：** 2025  
+**状态：** ✅ 稳定运行，Bug较少
 
-如遇到问题，请提供：
-1. 具体的错误信息
-2. 操作步骤
-3. 系统环境（操作系统、Python版本）
-4. 日志输出
+**功能清单：**
+- [x] 文字转音乐代码
+- [x] 音频转代码（MP3/WAV）
+- [x] 风格转换
+- [x] 反馈优化
+- [x] MIDI导出/加载
+- [x] 意图理解
+- [x] 桌面GUI
+- [x] Web界面
 
-### 功能建议
+---
 
-欢迎提出改进建议，包括：
-- 新的音乐风格支持
-- 用户体验优化
-- 性能提升建议
-- 新功能想法
+## 🤝 参与贡献
+
+欢迎提交Issue和Pull Request！
+
+**贡献方向：**
+- 🐛 Bug修复
+- ✨ 新功能
+- 📝 文档改进
+- 🎨 界面优化
 
 ---
 
@@ -676,34 +434,31 @@ pip install PyQt5
 
 ---
 
-## 🔗 相关资源
+## 🎉 开始创作
 
-- **Sonic Pi官网**：https://sonic-pi.net/
-- **DeepSeek平台**：https://platform.deepseek.com/
-- **通义千问**：https://dashscope.aliyun.com/
-- **Python官网**：https://www.python.org/
-
----
-
-## 🎉 开始创作吧！
-
-现在你已经掌握了所有必要的知识，开始用AI创作属于你的音乐吧！
-
-**快速启动：**
 ```bash
-cd backend
+# 1. 克隆项目
+git clone https://github.com/SeanLIUXQ/MusicAgent.git
+
+# 2. 安装依赖
+cd MusicAgent/backend
+pip install -r requirements.txt
+
+# 3. 配置API Key
+export DEEPSEEK_API_KEY="sk-your-key"
+
+# 4. 启动应用
 python gui_app.py
 ```
 
-**需要帮助？**
-1. 查看"常见问题"部分
-2. 运行 `cd backend && python 检查依赖.py` 诊断问题
-3. 参考详细技术文档
+🎵 **祝你音乐创作愉快！**
 
 ---
 
-**版本**: v1.0 (稳定版)  
-**更新时间**: 2025  
-**状态**: ✅ 稳定运行，bug较少
+<div align="center">
 
-🎵 **祝你音乐创作愉快！**
+**Star ⭐ 本项目如果觉得有帮助！**
+
+[项目主页](https://github.com/SeanLIUXQ/MusicAgent) · [问题反馈](https://github.com/SeanLIUXQ/MusicAgent/issues) · [参与贡献](https://github.com/SeanLIUXQ/MusicAgent/pulls)
+
+</div>
