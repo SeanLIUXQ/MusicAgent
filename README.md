@@ -43,22 +43,42 @@ cd MusicAgent
 ### 安装依赖
 
 **进入backend目录：**
+
 ```bash
 cd backend
 ```
 
-**方法A - Windows自动安装（推荐）：**
+**Windows（推荐）：**
+
 ```bash
 # 双击运行
-安装依赖.bat
+install_deps.bat
 ```
 
-**方法B - 手动安装：**
+**Mac/Linux：**
+
 ```bash
 pip install -r requirements.txt
 ```
 
+### 启动应用
+
+**Windows：**
+
+```bash
+# 双击运行 double click for running
+start_app.bat
+```
+
+**手动启动：**
+```bash
+python gui_app.py
+```
+
+
+
 **核心依赖包：**
+
 - `openai` - DeepSeek API调用
 - `PyQt5` - 桌面GUI界面
 - `music21` - 音乐理论处理
@@ -89,8 +109,7 @@ api_key = 'sk-your-api-key-here'
 ```
 
 **千问Omni API（音频功能）：**
-- API Key已内置在 `backend/qwen_omni_audio_to_sonicpi.py`
-- **无需额外配置**
+- API Key在 `backend/qwen_omni_audio_to_sonicpi.py`**需额外配置**
 
 ---
 
@@ -102,7 +121,7 @@ api_key = 'sk-your-api-key-here'
 cd backend
 
 # Windows - 双击运行
-启动应用.bat
+start_app.bat
 
 # 或手动运行
 python gui_app.py
@@ -203,8 +222,8 @@ MusicAgent/
 │   ├── style_transfer.py       # 风格转换模块
 │   ├── qwen_omni_audio_to_sonicpi.py  # 音频转代码
 │   ├── requirements.txt        # Python依赖
-│   ├── 安装依赖.bat            # Windows安装脚本
-│   ├── 启动应用.bat            # Windows启动脚本
+│   ├── install_deps.bat            # Windows安装脚本
+│   ├── start_app.bat            # Windows启动脚本
 │   └── midi_output/           # MIDI输出目录
 │
 ├── frontend/                   # 前端代码 (Vue.js)
