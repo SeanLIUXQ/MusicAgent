@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: musicagent-demo
+    runtime: docker
+    plan: free
+    autoDeployTrigger: commit
+    healthCheckPath: /api/health
+    envVars:
+      - key: DEEPSEEK_API_KEY
+        sync: false

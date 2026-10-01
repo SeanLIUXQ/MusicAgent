@@ -1,0 +1,12 @@
+.git
+.github
+.impeccable
+.pytest_cache
+.venv
+backend/__pycache__
+backend/music_output
+backend/tests
+frontend/dist
+frontend/node_modules
+*.pyc
+*.pyo
